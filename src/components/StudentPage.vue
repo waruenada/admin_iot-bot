@@ -111,11 +111,7 @@ export default {
     update_data(newValue){
       if (newValue === true) {
         this.$store.commit("update_data",false);
-        // this.professor_value = this.$store.state.get_value
         this.get_student()
-       
-        // console.log(this.$store.state.user_data);
-        // this.items = this.professor_value.student
       }
     }
   },
@@ -123,9 +119,6 @@ export default {
     openDialog_delete(){
       this.$store.commit("delete_data", true)
       
-    },
-    opemDialog_add_operator(){
-      this.$refs.add_operator.openDialog_add_operator()
     },
     get_student(){
       axios.get(this.$store.state.url_get_API_axios + "/api/v1/admin/users/student_information", {
@@ -155,9 +148,15 @@ export default {
       })
     },
     student_value(value){
+      // console.log(value);
+      this.$store.commit("student_data", value)
       if (this.$store.state.delete_data == true) {
         this.$store.commit("delete_data", false)
         this.$refs.delete_operator.openDialog_delete(value)
+      }else if (this.$store.state.delete_data == false) {
+        
+        this.$store.commit("update_selected", "operatorOnStudent_page")
+        
       }
     }
   }

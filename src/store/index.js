@@ -15,7 +15,9 @@ export default new Vuex.Store({
     add_student:"",
     status_button:"",
     get_value:"",
-    user_data:""
+    user_data:"",
+    student_index:"",
+    student_data:""
   },
   mutations: {
     update_selected(state, val){
@@ -24,6 +26,13 @@ export default new Vuex.Store({
     },
     status_button(state, val){
       state.status_button = val
+    },
+    student_data(state, val){
+      state.update_data = val
+      console.log(val);
+    },
+    student_index(state, val){
+      state.student_index = val
     },
     getData_professor(state, val){
       state.professor_value = val

@@ -29,6 +29,7 @@
     <OperatorsPage v-if="this.$store.state.selected_value === 'operators_page'"></OperatorsPage>
     <ProfessorPage v-if="this.$store.state.selected_value === 'professor_page'"></ProfessorPage>
     <StudentPage v-if="this.$store.state.selected_value === 'student_page'"></StudentPage>
+    <operatorOnstudent v-if="this.$store.state.selected_value === 'operatorOnStudent_page'"></operatorOnstudent>
   </div>
 </template>
 
@@ -36,13 +37,15 @@
 import OperatorsPage from '../components/OperatorsPage.vue';
 import ProfessorPage from '../components/ProfessorPage.vue';
 import StudentPage from '../components/StudentPage.vue';
+import operatorOnstudent from '../components/operatorOnStudent.vue'
 
 
 export default {
   components: {
     OperatorsPage,
     ProfessorPage,
-    StudentPage
+    StudentPage,
+    operatorOnstudent
   },
   data() {
     return {

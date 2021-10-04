@@ -4,7 +4,7 @@
       <v-card>
         <v-system-bar color="white">
           <v-spacer></v-spacer>
-          <v-btn icon @click="dialog = false" class="mt-2 mr-n2"
+          <v-btn icon @click="dialog_add_student = false" class="mt-2 mr-n2"
             ><v-icon color="binary" medium>mdi-close</v-icon></v-btn
           ></v-system-bar
         >
@@ -22,7 +22,7 @@
               <v-btn color="secondary" dark @click="add_student()">Add</v-btn>
             </v-col>
             <v-col cols="4">
-              <v-btn color="cancel" dark @click="dialog_add_operator = false"
+              <v-btn color="cancel" dark @click="dialog_add_student = false"
                 >Cancel</v-btn
               >
             </v-col>
@@ -48,6 +48,7 @@ export default {
     openDialog_add_new_student(value) {
       this.dialog_add_student = true;
     this.teacher_all = this.$store.state.professor_value
+    console.log(this.teacher_all);
       this.teacher_id = this.teacher_all.teacher_one_id
       this.student_id = value.one_id
       console.log(this.student_id);

@@ -152,6 +152,24 @@ export default {
         );
       }
     },
+    openDialog_new_student(value){
+      this.$store.commit("getData_professor", value)
+      console.log(value);
+      this.dialog_add_student = true;
+      axios
+        .get(
+          this.$store.state.url_get_API_axios +
+            "/api/v1/admin/users/user_by_role",
+          {
+            headers: {
+              Authorization: this.$store.state.user_token,
+            },
+          }
+        )
+        .then((response) => {
+          this.items = response.data.data
+        })
+    },
     openDialog_add_student() {
       this.dialog_add_student = true;
       axios

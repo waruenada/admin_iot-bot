@@ -4,7 +4,7 @@
       <v-card>
         <v-system-bar color="white">
           <v-spacer></v-spacer>
-          <v-btn icon @click="dialog = false" class="mt-2 mr-n2"
+          <v-btn icon @click="dialog_add_operator = false" class="mt-2 mr-n2"
             ><v-icon color="binary" medium>mdi-close</v-icon></v-btn
           ></v-system-bar
         >
