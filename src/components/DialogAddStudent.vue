@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="dialog_delete" class="css" width="330px">
+    <v-dialog v-model="dialog_add_student" class="css" width="330px">
       <v-card>
         <v-system-bar color="white">
           <v-spacer></v-spacer>
@@ -11,7 +11,7 @@
         <v-row justify="center" align="center" class="ma-0">
           <v-col cols="10">
             <v-card-text style="font-size: 20px; color: #595959" class="ml-2"
-              >Do you want to delete?</v-card-text
+              >Do you want to add?</v-card-text
             >
           </v-col>
         </v-row>
@@ -19,12 +19,10 @@
         <v-card-actions>
           <v-row justify="center" class="ma-0" align="center">
             <v-col cols="4" class="ml-n4">
-              <v-btn color="secondary" dark @click="delete_operator()"
-                >Delete</v-btn
-              >
+              <v-btn color="secondary" dark @click="add_student()">Add</v-btn>
             </v-col>
             <v-col cols="4">
-              <v-btn color="cancel" dark @click="dialog_delete = false"
+              <v-btn color="cancel" dark @click="dialog_add_operator = false"
                 >Cancel</v-btn
               >
             </v-col>
@@ -36,26 +34,36 @@
 </template>
 <script>
 import axios from "axios";
+
 export default {
   data() {
     return {
-      dialog_delete: false,
-      operator_id: "",
+      dialog_add_student: false,
+      teacher_id: "",
+      student_id:"",
+      teacher_all:""
     };
   },
   methods: {
-    openDialog_delete(value) {
-      this.dialog_delete = true;
-      this.operator_id = value.teacher_one_id;
-      console.log(this.operator_id);
+    openDialog_add_new_student(value) {
+      this.dialog_add_student = true;
+    this.teacher_all = this.$store.state.professor_value
+      this.teacher_id = this.teacher_all.teacher_one_id
+      this.student_id = value.one_id
+      console.log(this.student_id);
+      console.log(this.teacher_id);
+
     },
-    delete_operator() {
-      // console.log('gggg');
+    add_student() {
+      var body = {
+          teacherID: this.teacher_id,
+          studentID: this.student_id
+      }
       axios
-        .delete(
+        .post(
           this.$store.state.url_get_API_axios +
-            "/api/v1/admin/users/delete_operator/" +
-            this.operator_id,
+            "/api/v1/admin/users/add_student",
+            body,
           {
             headers: {
               Authorization: this.$store.state.user_token,
@@ -64,11 +72,12 @@ export default {
         )
         .then((response) => {
           console.log(response);
-          if (response.data.statusCode == "200") {
-            this.$store.commit("update_data", true);
-            this.dialog_delete = false;
+          if (response.data.statusCode == "201") {
+            this.$store.commit("add_data", true);
+            this.$store.commit("update_data", true)
+            this.dialog_add_student = false;
             this.$fire({
-              title: "Delete Complete",
+              title: "Add Complete",
               type: "success",
               timer: 2000,
               showConfirmButton: false,

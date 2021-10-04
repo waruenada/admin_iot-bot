@@ -20,16 +20,16 @@
             </v-card-title>
             <v-data-table
               :headers="headers"
-              :items="desserts"
+              :items="items"
               :search="search"
               class="elevation-1"
-              @click:row="openProfessorPage"
+              @click:row="student_value"
             >
               <!-- <template v-slot:header.add_operator="{ header }">
                 {{ header.text }}
                 <v-btn color="yellow" class="white--text" small @click="opemDialog_add_operator()">Add Operator</v-btn>
               </template> -->
-              <template v-slot:item.add_operator>
+              <template v-slot:item.delete_student>
                 <v-btn
                   x-small
                   color="blue"
@@ -48,79 +48,117 @@
 </template>
 
 <script>
-import deleteOperator from '../components/DialogDelete.vue';
-import addOperator from '../components/AddOperator.vue'
+import deleteOperator from '../components/DialogDeleteStudent.vue';
+import addOperator from '../components/AddOperator.vue';
+import axios from "axios";
 export default {
   data() {
     return {
       search: "",
-      desserts: [
-        {
-          name: "Aj.Anonimus",
-          one_email: "anonimus@one.th",
-          operator: "Aj.Anonimus",
-        },
-        {
-          name: "Aj.David",
-          one_email: "david@one.th",
-          operator: "Aj.Anonimus",
-        },
-        {
-          name: "Aj.Bobby",
-          one_email: "bobby@one.th",
-          operator: "Aj.Anonimus",
-        },
-      ],
+      items:[],
+      value:[],
+      teacher_name:"",
+      student_email:"",
+      student_name:"",
+      student_id:""
     };
   },
   components: {
     deleteOperator,
     addOperator
   },
+  mounted(){
+    this.get_student()
+  },
   computed: {
     headers() {
       return [
         {
           text: "Name",
-          value: "name",
+          value: "student_name",
           align: "center",
           sortable: false,
           width: "300"
         },
         {
           text: "One Email",
-          value: "one_email",
+          value: "student_email",
           align: "center",
           sortable: false,
           width: "300"
         },
         {
           text: "Operator",
-          value: "operator",
+          value: "teacher_name",
           align: "center",
           sortable: false,
           width: "300"
         },
         {
           text: "",
-          value: "add_operator",
+          value: "delete_student",
           align: "center",
           sortable: false,
         },
       ];
+      
     },
+    update_data(){
+      return this.$store.state.update_data;
+    }
+  },
+  watch: {
+    update_data(newValue){
+      if (newValue === true) {
+        this.$store.commit("update_data",false);
+        // this.professor_value = this.$store.state.get_value
+        this.get_student()
+       
+        // console.log(this.$store.state.user_data);
+        // this.items = this.professor_value.student
+      }
+    }
   },
   methods: {
     openDialog_delete(){
-      this.$refs.delete_operator.openDialog_delete()
+      this.$store.commit("delete_data", true)
+      
     },
     opemDialog_add_operator(){
       this.$refs.add_operator.openDialog_add_operator()
     },
-    openProfessorPage(value){
-      this.$store.commit("update_selected","professor_page")
-      console.log(value);
-      this.$store.commit("getData_professor",value)
+    get_student(){
+      axios.get(this.$store.state.url_get_API_axios + "/api/v1/admin/users/student_information", {
+        headers: {
+            Authorization: this.$store.state.user_token,
+          },
+      }).then((response) => {
+        console.log(response);
+        this.value = response.data.data
+        for (let index = 0; index < this.value.length; index++) {
+          const element = this.value[index];
+          this.teacher_name = element.teacher_name
+          this.student_name = element.student_name
+          this.student_email = element.student_name
+          this.student_id = element.student_id
+          if (this.teacher_name != null) {
+            this.items.push({
+              student_name: this.student_name,
+              student_email: this.student_email,
+              student_id: this.student_id,
+              teacher_name: this.teacher_name
+            })
+          }
+          
+        }
+        console.log(this.items);
+      })
+    },
+    student_value(value){
+      if (this.$store.state.delete_data == true) {
+        this.$store.commit("delete_data", false)
+        this.$refs.delete_operator.openDialog_delete(value)
+      }
     }
   }
 };

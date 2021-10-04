@@ -25,9 +25,10 @@
             </v-card-title>
             <v-data-table
               :headers="headers"
-              :items="desserts"
+              :items="items"
               :search="search"
               class="elevation-1"
+              @click:row="get_data"
               
             >
               <!-- <template v-slot:header.add_operator="{ header }">
@@ -55,29 +56,15 @@
 
 <script>
 import deleteOperator from '../components/DialogDelete.vue';
-import addNewOperator from '../components/DialogAddOperator.vue'
+import addNewOperator from '../components/DialogAddOperator.vue';
+import axios from "axios";
 export default {
   data() {
     return {
         search: "",
         dialog_add_operator: false,
-      desserts: [
-        {
-          name: "Aj.Anonimus",
-          one_email: "anonimus@one.th",
-          student: "10",
-        },
-        {
-          name: "Aj.David",
-          one_email: "david@one.th",
-          student: "8",
-        },
-        {
-          name: "Aj.Bobby",
-          one_email: "bobby@one.th",
-          student: "16",
-        },
-      ],
+        user_id:"",
+      items:[]
     };
   },
   components: {
@@ -109,13 +96,46 @@ export default {
         },
       ];
     },
+    update_user(){
+      return this.$store.state.update_user;
+    }
+  },
+  watch: {
+    update_user(newValue){
+      if (newValue === true) {
+        this.$store.commit("update_user",false);
+        this.get_user();
+      }
+    }
   },
   methods: {
     openDialog_add_new_operator(){
-      this.$refs.add_operator.openDialog_add_new_operator()
+      this.$store.commit("add_data", true)
+      
     },
     openDialog_add_operator(){
         this.dialog_add_operator = true
+        this.get_user()
+    },
+    get_data(value){
+      // console.log(value);
+      this.user_id = value.one_id
+      // console.log(this.$store.state.add_data);
+      if (this.$store.state.add_data == true) {
+        this.$store.commit("add_data", false)
+        this.$refs.add_operator.openDialog_add_new_operator(this.user_id)
+      }
+    },
+    get_user(){
+      axios.get(this.$store.state.url_get_API_axios + "/api/v1/admin/users/user_by_role",{
+        headers: {
+              Authorization: this.$store.state.user_token,
+            },
+      }).then((response) => {
+        console.log(response);
+        this.items = response.data.data
+      })
+
     }
   }
 };

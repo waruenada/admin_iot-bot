@@ -7,7 +7,7 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col class="ml-14">
+        <v-col class="ml-5">
           <v-card>
             <v-card-title>
               <v-text-field
@@ -20,20 +20,23 @@
             </v-card-title>
             <v-data-table
               :headers="headers"
-              :items="desserts"
+              :items="items"
               :search="search"
               class="elevation-1"
               @click:row="openProfessorPage"
             >
               <template v-slot:header.add_operator="{ header }">
                 {{ header.text }}
-                <v-btn color="yellow" class="white--text" small @click="opemDialog_add_operator()">Add Operator</v-btn>
+                <v-btn
+                  color="yellow"
+                  class="white--text"
+                  small
+                  @click="openDialog_add_operator()"
+                  >Add Operator</v-btn
+                >
               </template>
               <template v-slot:item.add_operator>
-                <v-btn
-                  x-small
-                  color="blue"
-                  @click="openDialog_delete()"
+                <v-btn x-small color="blue" @click="openDialog_delete()"
                   ><v-icon color="white" small>mdi-delete</v-icon></v-btn
                 >
               </template>
@@ -48,53 +51,38 @@
 </template>
 
 <script>
-import deleteOperator from '../components/DialogDelete.vue';
-import addOperator from '../components/AddOperator.vue'
+import deleteOperator from "../components/DialogDelete.vue";
+import addOperator from "../components/AddOperator.vue";
+import axios from "axios";
 export default {
   data() {
     return {
       search: "",
-      desserts: [
-        {
-          name: "Aj.Anonimus",
-          one_email: "anonimus@one.th",
-          student: "10",
-        },
-        {
-          name: "Aj.David",
-          one_email: "david@one.th",
-          student: "8",
-        },
-        {
-          name: "Aj.Bobby",
-          one_email: "bobby@one.th",
-          student: "16",
-        },
-      ],
+      items: [],
     };
   },
   components: {
     deleteOperator,
-    addOperator
+    addOperator,
   },
   computed: {
     headers() {
       return [
         {
           text: "Name",
-          value: "name",
+          value: "teacher_name",
           align: "center",
           sortable: false,
         },
         {
           text: "One Email",
-          value: "one_email",
+          value: "teacher_onemail",
           align: "center",
           sortable: false,
         },
         {
           text: "Student",
-          value: "student",
+          value: "num_of_student",
           align: "center",
           sortable: false,
         },
@@ -106,19 +94,67 @@ export default {
         },
       ];
     },
+    update_data() {
+      return this.$store.state.update_data;
+    },
   },
+  watch: {
+    update_data(newValue) {
+      if (newValue === true) {
+        this.$store.commit("update_data", false);
+        this.get_data();
+      }
+    },
+  },
+
+  mounted() {
+    var parameters = this.$route.query;
+    this.parameters_onechat_token = parameters.onechat_token;
+    window.localStorage.setItem("User_token", this.parameters_onechat_token);
+    this.$store.commit("get_token", this.parameters_onechat_token);
+    this.get_data();
+  },
+
   methods: {
-    openDialog_delete(){
-      this.$refs.delete_operator.openDialog_delete()
+    openDialog_delete() {
+      this.$store.commit("delete_data", true);
     },
-    opemDialog_add_operator(){
-      this.$refs.add_operator.openDialog_add_operator()
+    openDialog_add_operator() {
+      this.$refs.add_operator.openDialog_add_operator();
     },
-    openProfessorPage(value){
-      this.$store.commit("update_selected","professor_page")
+    openProfessorPage(value) {
       console.log(value);
-      this.$store.commit("getData_professor",value)
-    }
-  }
+      // window.localStorage.setItem("get_value", value.student);
+      this.$store.commit("get_value", value);
+      if (this.$store.state.delete_data == true) {
+        console.log("delete");
+        this.$store.commit("delete_data", false);
+        this.$refs.delete_operator.openDialog_delete(value);
+      } else {
+        console.log("not delete");
+        // console.log(this.items.indexOf(value));
+        window.localStorage.setItem("User_index", this.items.indexOf(value));
+        this.$store.commit("update_selected", "professor_page");
+        this.$store.commit("getData_professor", value);
+      }
+    },
+    get_data() {
+      axios
+        .get(
+          this.$store.state.url_get_API_axios +
+            "/api/v1/admin/users/operator_information",
+          {
+            headers: {
+              Authorization: this.parameters_onechat_token,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          this.items = response.data.data;
+          this.$store.commit("get_user_data", this.items)
+        });
+    },
+  },
 };
 </script>

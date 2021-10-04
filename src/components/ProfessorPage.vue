@@ -25,9 +25,10 @@
             </v-card-title>
             <v-data-table
               :headers="headers"
-              :items="desserts"
+              :items="items"
               :search="search"
               class="elevation-1"
+              @click:row="checkButton"
             >
               <template v-slot:header.add_operator="{ header }">
                 {{ header.text }}
@@ -52,27 +53,16 @@
 </template>
 
 <script>
-import deleteOperator from '../components/DialogDelete.vue';
+import deleteOperator from '../components/DialogDeleteStudent.vue';
 import addStudent from '../components/AddStudent.vue'
+import axios from "axios";
 export default {
   data() {
     return {
         search: "",
         professor_value:"",
-      desserts: [
-        {
-          name: "Aj.Anonimus",
-          one_email: "anonimus@one.th",
-        },
-        {
-          name: "Aj.David",
-          one_email: "david@one.th",
-        },
-        {
-          name: "Aj.Bobby",
-          one_email: "bobby@one.th",
-        },
-      ],
+        user_index:"",
+      items:[]
     };
   },
   components: {
@@ -84,14 +74,14 @@ export default {
       return [
         {
           text: "Name",
-          value: "name",
+          value: "student_name",
           align: "center",
           sortable: false,
           width: "350"
         },
         {
           text: "One Email",
-          value: "one_email",
+          value: "student_one_email",
           align: "center",
           sortable: false,
           width: "350"
@@ -104,17 +94,61 @@ export default {
         },
       ];
     },
+    update_data(){
+      return this.$store.state.update_data;
+    }
+  },
+  watch: {
+    update_data(newValue){
+      if (newValue === true) {
+        console.log('gggggs');
+        this.$store.commit("update_data",false);
+        // this.professor_value = this.$store.state.get_value
+        this.get_data()
+       
+        // console.log(this.$store.state.user_data);
+        // this.items = this.professor_value.student
+      }
+    }
   },
   mounted(){
       this.professor_value = this.$store.state.professor_value
+      this.user_index = window.localStorage.getItem("User_index")
+      console.log(this.professor_value);
+      this.items = this.professor_value.student
 
   },
   methods: {
+    get_data() {
+      axios
+        .get(
+          this.$store.state.url_get_API_axios +
+            "/api/v1/admin/users/operator_information",
+          {
+            headers: {
+              Authorization: this.$store.state.user_token,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          this.items = response.data.data[this.user_index].student;
+          // this.$store.commit("get_user_data", this.items)
+        });
+    },
+    checkButton(value){
+      if (this.$store.state.status_button === true) {
+        this.$refs.delete_operator.openDialog_delete(value)
+      }
+    },
     openDialog_delete(){
-      this.$refs.delete_operator.openDialog_delete()
+      this.$store.commit("status_button", true)
+      
     },
     openDialog_add_student(){
-      this.$refs.add_student.openDialog_add_student()
+      this.$store.commit("status_button", true)
+      this.$refs.add_student.openDialog_add_student(this.items)
+      
     }
   }
 };
